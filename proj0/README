@@ -1,0 +1,66 @@
+🚀 CS61B Project 0 环境配置与避坑指南
+本指南记录了从解决 Git 权限、强制找回依赖库到成功运行 JUnit 测试的完整实战方案。
+
+1. Git 与 GitHub 权限配置 (SSH 篇)
+如果你在克隆时遇到 Permission denied (publickey)：
+
+生成密钥：ssh-keygen -t ed25519 -C "your_email@qq.com"（一路回车，不要输入文件名）。
+
+绑定 GitHub：cat ~/.ssh/id_ed25519.pub 复制内容，贴到 GitHub Settings 的 SSH Keys 中。
+
+验证：执行 ssh -T git@github.com，看到 Hi [YourName]! 即成功。
+
+2. 核心突破：解决缺失的 library-sp24
+如果克隆后的文件夹里没有 jar 包，且 update 命令无效，请使用以下强制添加方案：
+
+关键命令
+Bash
+
+# 在项目根目录下运行，直接将远程库作为子模块强制添加
+git submodule add https://github.com/berkeley-cs61b/library-sp24.git library-sp24
+原理：该命令会直接向 .gitmodules 写入配置并开始拉取代码，彻底解决“本地索引认为有、实际文件夹为空”的尴尬状态。
+
+3. IntelliJ IDEA 环境“点亮”步骤
+即使文件有了，IDE 不识别依然无法运行。请按顺序操作：
+
+修改 .iml 文件：手动编辑 proj0.iml，确保 src 为 isTestSource="false"，tests 为 isTestSource="true"。
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="javalib" level="project" />
+    <orderEntry type="library" name="library-sp24" level="project" />
+  </component>
+</module>
+
+手动关联库：
+
+Ctrl + Alt + Shift + S -> Libraries -> + (Java)。
+
+选中刚刚下载好的 library-sp24 文件夹。
+
+确定模块依赖：在 Modules -> Dependencies 中，确保 library-sp24 已被勾选，这样代码里的 import org.junit 才会从红色变正常。
+
+4. 逻辑实现：atLeastOneMoveExists
+在 Model.java 中，判断逻辑应遵循：
+
+先行判断：优先调用 emptySpaceExists(b)，有空格直接返 true。
+
+后行扫描：双重 for 循环遍历全盘，每个格子只需与右侧和下方对比。
+
+安全检查：对比前确保索引不越界（c + 1 < size 和 r + 1 < size）。
+
+5. 调试与运行
+批量测试：在 proj0 文件夹上右键 -> Run 'All Tests'。
+
+查看报错：点击红色叉号，通过 Expected 和 Actual 的对比定位逻辑漏洞。
+
+环境刷新：若配置改了还没箭头，点击 File -> Invalidate Caches -> Restart。
+
+心得：在 OneDrive 环境下开发时，如果遇到编译文件被占用，记得先暂停同步。环境通了，Project 0 就成功了一半！

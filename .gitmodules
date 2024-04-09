@@ -1,0 +1,3 @@
+[submodule "library-sp24"]
+	path = library-sp24
+	url = https://github.com/berkeley-cs61b/library-sp24.git
